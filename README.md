@@ -1,5 +1,7 @@
 # windows_cmd_parse_netsh_wlan_info
 
+<img src="https://raw.githubusercontent.com/automatize-it/windows_cmd_parse_netsh_wlan_info/master/screenshots/Screenshot_main.png"/>
+
 This cmd script parses result of 'netsh wlan show all' command. 
 
 Then: 
