@@ -1,0 +1,70 @@
+<?php
+
+define("dDate", 0);
+define("dTime", 1);
+define("lat", 2);
+define("lon", 3);
+
+$data_string;
+$data;
+$dummy_gps = '55.776, 37.713';
+
+function dbConn(){
+	
+	$mndb = new mysqli('localhost', 'bd', 'bdpass', 'ntbks_loc');
+
+	if (!$mndb) {
+		die('Could not connect: ' . mysqli_error());
+	}
+	
+	return($mndb);
+}
+
+
+function getList($mndb){
+	
+	$lptpsNames = array();
+	
+	if ($result = $mndb->query("SELECT table_name FROM information_schema.tables WHERE table_schema='ntbks_loc'")){
+
+		while ($row = $result->fetch_array()){ 
+				
+			$lptpsNames[] = $mndb->real_escape_string($row[0]);
+		}
+		
+		/* free result set */
+		$result->free();
+	}
+	
+	unset($lptpsNames[0]);
+	return $lptpsNames;
+}
+
+
+function getData($mndb,$id)
+{
+	
+	$result = $mndb->query("SELECT * FROM `$id` ORDER BY `ddate` DESC, `dtime` DESC LIMIT 1");
+	$keyarr = $result->fetch_array();
+	$result->free();
+	
+	return $keyarr;
+}
+
+
+function getAllData($mndb,$id)
+{
+	
+	$result = $mndb->query("SELECT * FROM `$id` ORDER BY `ddate` ASC, `dtime` ASC");
+	$keyarr = array();
+	while($inclArr = $result->fetch_array()){
+		
+		$keyarr[] = $inclArr;
+	}
+	$result->free();
+	
+	return $keyarr;
+}
+
+
+?>

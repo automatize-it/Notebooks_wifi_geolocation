@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>ноутбуки</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Refresh" content="360"/>
+	<link rel="stylesheet" href="leaflet/leaflet.css" />
+	<style>
+		.t_text_icon {
+			color: white; 
+			font-size: 14pt;
+			font-weight: bold;
+		}
+		.centered {
+			position: absolute;
+			top: 50%;
+			left: 300%;
+			transform: translate(-50%, -50%);
+		}
+		
+		.container {
+			position: relative;
+			text-align: center;
+			color: white;
+		}
+		
+		.smlltxt{
+			
+			font-size: 8pt;
+			margin: 0.1em;
+			color: black;
+			background: rgba(255,255,255,0.7);;
+			position: absolute;
+			top: 110%;
+			left: 300%;
+			transform: translate(-50%, -50%);
+		}
+	<!-- text-shadow: 1px 1px 4px #87CEFA, -1px -1px 4px #87CEFA;-->
+	</style>
+	
+</head>
+<body>
+
+	<?php
+	
+	include 'handler.php';
+	
+	$db = dbConn();
+	
+	?>
+	<h3 align="center">Текущее местонахождение ноутбуков компании "X"</h3>
+	<div id="map" style="width: 100%; height: 720px;"></div></p>
+	<script src="leaflet/leaflet.js"></script>
+	<?php
+	
+	function dtc( $data ) {
+		$output = $data;
+		if ( is_array( $output ) )
+			$output = implode( ',', $output);
+
+		echo "<script>console.log( 'Debug Objects: " . $output . "' );</script>";
+	}
+	?>
+	<script>
+		
+		var map = L.map('map').setView([55.751, 37.618], 10); 
+
+		// add the OpenStreetMap tiles
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+		}).addTo(map);
+		
+		<?php
+		
+		foreach ((getList($db)) as $lptp) {
+			
+			$tmpArr = array();
+			
+			$tmpArr = getData($db, $lptp);
+			
+			$lptp = strtoupper($lptp);
+			
+			//temp ugly workaround for markers having same one def coord
+			if ($tmpArr[2] == "55.75321578979492" && $tmpArr[3] == "37.62250518798828"){
+				
+				$tmpArr[2] = round($tmpArr[2],2);
+				$tmpArr[3] = round($tmpArr[3],2);
+				$tmpArr[2] += (rand(-5, 5) * 0.001);
+				$tmpArr[3] += (rand(-5, 5) * 0.001);
+				$tmpArr[8] = "(не определено, координаты по умолчанию)";
+			}
+			
+			echo "var tmpIcon = L.divIcon({className: 't_text_icon',html: '<div class=\"container\"><img src=\"lenovo_g580.png\" width=\"64\"><div class=\"smlltxt\">$tmpArr[0] $tmpArr[1]</div><div class=\"centered\">$lptp</div></div>'});";
+			echo "L.marker({lon: ".$tmpArr[3].", lat: ".$tmpArr[2]."}, {icon: tmpIcon, riseOnHover: 'True'} ).addTo(map).bindPopup('<p>Последние данные от: $tmpArr[0] $tmpArr[1]<br>Адрес: $tmpArr[4], $tmpArr[5], $tmpArr[6], $tmpArr[8]<br><a href=\"history.php?lptp=$lptp\">История местоположений</a></p>');";
+		}
+		
+		?>
+		</script>
+		<script>
+//обслуживатель кликера на карте		
+		function onMapClick(e) {
+			popup
+				.setLatLng(e.latlng)
+				.setContent("You clicked the map at " + e.latlng.toString())
+				.openOn(map);
+		}
+
+		map.on('click', onMapClick);
+
+	</script>
+
+	<p align="center">проект в стадии тестирования. точность и актуальность информации не гарантируется</p>
+	
+</body>
+</html>
